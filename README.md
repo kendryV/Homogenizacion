@@ -56,4 +56,4 @@ Los cógigos aquí contenidos se escribieron en R-Studio versión 3.6 y requiere
 
 ## Agradecimientos 
 
-Al Instituto de Hidrología, Meteorología y Estudios Ambientales (IDEAM), a Ruth Correa y María Inés Cubillos de la Subdirección de Meteorología.
+Al Instituto de Hidrología, Meteorología y Estudios Ambientales (IDEAM), a Ruth Correa y María Inés Cubillos de la Subdirección de Meteorología. A Gustavo Cabrales por el procesamiento y descarga de los datos de GPCC, a Yenny Sánchez por la colaboración en la elaboración de algunos mapas

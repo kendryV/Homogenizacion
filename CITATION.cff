@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use the codes in this repository, please cite it as below."
+authors:
+  # add additional entries for each author -- see https://github.com/citation-file-format/citation-file-format/blob/main/schema-guide.md
+  - family-names: Bernal Suárez
+    given-names: Néstor Ricardo
+    orcid: https://orcid.org/0000-0003-0926-7935
+    affiliation: Universidad Distrital Francisco José de Caldas
+  - family-names: Pabón Caicedo
+    given-names: José Daniel
+    affiliation: Universidad Nacional de Colombia
+  - name: "AtmosCol 2023" # use the 'name' field to acknowledge organizations
+    website: "https://www.uniquindio.edu.co/atmoscol2023/"
+title: "Taller de datos Homogenización de series de tiempo con R - AtmosCol 2023"

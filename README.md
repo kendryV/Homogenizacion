@@ -2,7 +2,7 @@
 
 # Taller de Homogenización de Series de Tiempo usando R - AtmosCol 2023
 
-[![DOI](https://zenodo.org/badge/686482876.svg)](https://zenodo.org/doi/10.5281/zenodo.8316796)
+[![DOI](https://zenodo.org/badge/686482876.svg)](https://zenodo.org/doi/10.5281/zenodo.10020141)
 
 ## Introducción
 

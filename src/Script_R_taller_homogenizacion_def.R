@@ -1,3 +1,8 @@
+  # Script para aplicar la metodología de homogenización de 
+  # Series de tiempo mensuales de precipitación 
+  # Taller Atmoscol2023
+  # Armenia, Quindío, Colombia (Sur América)
+
   # Región Alto Cauca 
   # Estación 26075010 
   # Nombre: Palmira ICA 
@@ -154,7 +159,7 @@
   
   # modelo de regresión 
   
-  mod1 <- lm(MergedDataset_IDEAM_GPCC$preci_IDEAM ~ MergedDataset_IDEAM_GPCC$preci_GPCC + mes, data=IDEAM_GPCC_26075010)
+  mod1 <- lm(MergedDataset_IDEAM_GPCC$preci_IDEAM ~ MergedDataset_IDEAM_GPCC$preci_GPCC + MergedDataset_IDEAM_GPCC$mes, data=IDEAM_GPCC_26075010)
   mod1
   summary(mod1)
   
@@ -171,7 +176,7 @@
                                                   preci_1 <- IDEAM_GPCC_26075010_1$preci_GPCC, preci_1 <- IDEAM_GPCC_26075010_1$preci_IDEAM)
   
   IDEAM_GPCC_26075010_1$Preci_est_IDEAM = if_else(IDEAM_GPCC_26075010_1$fecha == "01/09/2011", 
-                                                  preci_1 <- (-9.569) + 0.972*IDEAM_GPCC_26075010_1$preci_GPCC + 0.677*IDEAM_GPCC_26075010_1$mes, preci_1 <- IDEAM_GPCC_26075010_1$Preci_est_IDEAM_1)
+                                                  preci_1 <- (-0.602) + 0.979*IDEAM_GPCC_26075010_1$preci_GPCC - 0.795*IDEAM_GPCC_26075010_1$mes, preci_1 <- IDEAM_GPCC_26075010_1$Preci_est_IDEAM_1)
   
   
   IDEAM_GPCC_26075010_2 <- data.frame(IDEAM_GPCC_26075010_1, IDEAM_GPCC_26075010_1$Preci_est_IDEAM)
@@ -202,6 +207,7 @@
   IDEAM_GPCC_26075010_2[299,]
   
   
+  
   # serie de tiempo precipitación IDEAM período 1981 a 2019
   
   Prec_IDEAM = data.frame(IDEAM_GPCC_26075010_2$Preci_est_IDEAM)
@@ -220,12 +226,84 @@
   plot(Prec_IDEAM_1)
   plot(Prec_GPCC_1)
   
+  
+  # Incluir ïndice ONI 
+  
+  # Lectura de datos estación 
+  
+  ONI_81_2019_3 <- read.delim("~/Choco/Region_9_Alto_Cauca/ONI_81_2019_3.txt", header=FALSE)
+  View(ONI_81_2019_3)
+  ONI <- ONI_81_2019_3
+  ONI
+  
+  dimnames(ONI)[[2]] <- c("fecha",  "mes_1", "ONI", "Evento", "Evento_especifico")
+  ONI
+  
+  # unir dos archivos 
+  
+  IDEAM_GPCC_26075010_2
+  MergedDataset_ONI_def <- merge(IDEAM_GPCC_26075010_2, ONI, all=TRUE, by="fecha")
+  MergedDataset_ONI_def
+  
+  # ordenar por fecha 
+  
+  Esta_26075010_ONI_def <- with(MergedDataset_ONI_def, MergedDataset_ONI_def[order(secuencia, decreasing=FALSE), ])
+  Esta_26075010_ONI_def
+  
+  Esta_26075010_ONI_def$ONI
+  
+  # identificación de fechas específicas con dato faltante
+  Esta_26075010_ONI_def[297,]
+  
+  # Homogenización  
+  
+  install.packages("dplyr", dep = TRUE)
+  library(dplyr)
+  
+  condicion_1 <- Esta_26075010_ONI_def$fecha %in% c("01/09/2005", "01/09/2011")
+  condicion_1
+ 
+  # Crear  Esta_26075010_ONI_def_1$Preci_est_IDEAM basado en la condición 
+  Esta_26075010_ONI_def_1$Preci_est_IDEAM <- ifelse(condicion_1, 
+                                                    (-0.602) + 0.979*Esta_26075010_ONI_def_1$preci_GPCC - 0.795*Esta_26075010_ONI_def_1$mes, 
+                                                    Esta_26075010_ONI_def_1$Preci_est_IDEAM)
+  
+  IDEAM_GPCC_26075010_ONI <- data.frame(Esta_26075010_ONI_def_1, Esta_26075010_ONI_def_1$Preci_est_IDEAM)
+  IDEAM_GPCC_26075010_ONI
+  View( IDEAM_GPCC_26075010_ONI)
+  
+  
+  # exportar datos a csv
+  
+  write.csv(IDEAM_GPCC_26075010_ONI,"IDEAM_GPCC_26075010_ONI.csv")
+  library(xlsx)
+  write.xlsx(IDEAM_GPCC_26075010_ONI, "IDEAM_GPCC_26075010_ONI.xlsx")
+  
+  # serie de tiempo precipitación IDEAM período 1981 a 2019
+  
+  Prec_IDEAM_def = data.frame(IDEAM_GPCC_26075010_ONI$Preci_est_IDEAM)
+  Prec_IDEAM_def
+  Prec_IDEAM_1_def <- ts(Prec_IDEAM_def, freq=12, start=c(1981,1), end=c(2019,12))
+  Prec_IDEAM_1_def
+  
+  # serie de tiempo precipitación GPCC período 1981 a 2019
+  
+  Prec_GPCC_def = data.frame(IDEAM_GPCC_26075010_ONI$preci_GPCC)
+  Prec_GPCC_def
+  Prec_GPCC_1_def <- ts(Prec_GPCC_def, freq=12, start=c(1981,1), end=c(2019,12))
+  Prec_GPCC_1_def
+  
+  par(mfrow = c(1,2))
+  plot(Prec_IDEAM_1_def)
+  plot(Prec_GPCC_1_def)
+  
+  
   # generar los índices de precipitación
   
   # seleccionar datos x mes 
   # mes enero
   
-  enero_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 1,]
+  enero_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 1,]
   enero_1
   
   prome_ene <- mean(enero_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -246,7 +324,7 @@
   
   # mes febrero
   
-  febre_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 2,]
+  febre_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 2,]
   febre_1
   
   prome_febre <- mean(febre_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -272,7 +350,7 @@
   
   # mes marzo
   
-  marzo_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 3,]
+  marzo_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 3,]
   marzo_1
   
   prome_marzo <- mean(marzo_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -293,7 +371,7 @@
   
   # mes abril
   
-  abril_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 4,]
+  abril_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 4,]
   abril_1
   
   prome_abril <- mean(abril_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -314,7 +392,7 @@
   
   # mes mayo
   
-  mayo_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 5,]
+  mayo_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 5,]
   mayo_1
   
   prome_mayo <- mean(mayo_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -336,7 +414,7 @@
   
   # mes junio
   
-  junio_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 6,]
+  junio_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 6,]
   junio_1
   
   prome_junio <- mean(junio_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -357,7 +435,7 @@
   
   # mes julio
   
-  julio_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 7,]
+  julio_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 7,]
   julio_1
   
   prome_julio <- mean(julio_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -379,7 +457,7 @@
   
   # mes agosto
   
-  agosto_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 8,]
+  agosto_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 8,]
   agosto_1
   
   prome_agosto<- mean(agosto_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -400,7 +478,7 @@
   
   # mes septiembre
   
-  septiembre_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 9,]
+  septiembre_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 9,]
   septiembre_1
   
   prome_septiembre<- mean(septiembre_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -421,7 +499,7 @@
   
   # mes octubre 
   
-  octubre_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 10,]
+  octubre_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 10,]
   octubre_1
   
   prome_octubre<- mean(octubre_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -442,7 +520,7 @@
   
   # mes noviembre
   
-  noviembre_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 11,]
+  noviembre_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 11,]
   noviembre_1
   
   prome_noviembre<- mean(noviembre_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -464,7 +542,7 @@
   
   # mes diciembre 
   
-  diciembre_1 <- IDEAM_GPCC_26075010_2[IDEAM_GPCC_26075010_2$mes == 12,]
+  diciembre_1 <-  IDEAM_GPCC_26075010_ONI[ IDEAM_GPCC_26075010_ONI$mes == 12,]
   diciembre_1
   
   prome_diciembre<- mean(diciembre_1$Preci_est_IDEAM, na.rm = TRUE)
@@ -521,13 +599,13 @@
   ene_feb_mar_ab_may_jul_ago_sep_oct_nov_dic_2 <- ene_feb_mar_ab_may_jul_ago_sep_oct_nov_2 %>% full_join(diciembre_2)
   ene_feb_mar_ab_may_jul_ago_sep_oct_nov_dic_2
   
-  Indices_clima_26075010 <- with(ene_feb_mar_ab_may_jul_ago_sep_oct_nov_dic_2, ene_feb_mar_ab_may_jul_ago_sep_oct_nov_dic_2[order(secuencia, decreasing=FALSE), ])
-  Indices_clima_26075010
+  Indices_clima_26075010_def <- with(ene_feb_mar_ab_may_jul_ago_sep_oct_nov_dic_2, ene_feb_mar_ab_may_jul_ago_sep_oct_nov_dic_2[order(secuencia, decreasing=FALSE), ])
+  Indices_clima_26075010_def
   
-  write.csv(Indices_clima_26075010,"Indices_clima_26075010.csv")
+  write.csv(Indices_clima_26075010_def,"Indices_clima_26075010_def.csv")
   library(xlsx)
-  write.xlsx(Indices_clima_26075010,"Indices_clima_26075010.xlsx")
-  
+  write.xlsx(Indices_clima_26075010_def,"Indices_clima_26075010_def.xlsx")
+  View(Indices_clima_26075010_def)
   
   # Cálculo índice SPI 
   
@@ -538,7 +616,7 @@
   # Cálculo del índice estandarizado de precipitación 
   # supuesto de modelo probabilístico Gamma
   
-  SPI3 = spi(Indices_clima_26075010$Preci_est_IDEAM, scale = 3, distribution = 'Gamma')
+  SPI3 = spi(Indices_clima_26075010_def$Preci_est_IDEAM, scale = 3, distribution = 'Gamma')
   SPI3
   
   plot(SPI3)
@@ -546,18 +624,18 @@
  
   # series índice 1, índice 2 e índice 3 preciitación IDEM como objeto de series de tiempo
   
-  preci.anm_1_1 <- ts(Indices_clima_26075010$preci.anm_1, freq=12, start=c(1981,1), end=c(2019,12))
+  preci.anm_1_1 <- ts(Indices_clima_26075010_def$preci.anm_1, freq=12, start=c(1981,1), end=c(2019,12))
   preci.anm_1_1
-  preci.anm_2_1 <- ts(Indices_clima_26075010$preci.anm_2, freq=12, start=c(1981,1), end=c(2019,12))
+  preci.anm_2_1 <- ts(Indices_clima_26075010_def$preci.anm_2, freq=12, start=c(1981,1), end=c(2019,12))
   preci.anm_2_1
-  preci.anm_3_1 <- ts(Indices_clima_26075010$preci.anm_3, freq=12, start=c(1981,1), end=c(2019,12))
+  preci.anm_3_1 <- ts(Indices_clima_26075010_def$preci.anm_3, freq=12, start=c(1981,1), end=c(2019,12))
   preci.anm_3_1
   
   # gráficos series de tiempo IDEAM y GPCC y SPI3-supuesto Gamma 
   
-  par(mfrow = c(1,3))
-  plot(Prec_IDEAM_est_1,main="Precipitación IDEAM", xlab="Año", ylab="Precipitación")
-  plot(Prec_GPCC_1,main="Precipitación GPCC", xlab="Año", ylab="Precipitación")
+  par(mfrow = c(1,3)) 
+  plot(Prec_IDEAM_1_def,main="Precipitación IDEAM", xlab="Año", ylab="Precipitación")
+  plot(Prec_GPCC_1_def,main="Precipitación GPCC", xlab="Año", ylab="Precipitación")
   plot(SPI3,main="Indice estandarizado precipitación, Gamma", xlab="Año", ylab="SPI3")
   
   # gráficos series de índice 1, índice 2 índice 3 y SPI3-Gamma 
